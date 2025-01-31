@@ -1,0 +1,6 @@
+.availability-cell {
+  min-width: 4em;
+  display: table-cell;
+  background: #3ad;
+  border-radius: 5px;
+}
