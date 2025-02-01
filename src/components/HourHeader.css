@@ -1,5 +1,6 @@
 .hour-header {
   width: 4em;
+  max-height: 2em;
   background: #acf;
   margin: 2px;
   border-radius: 5px;

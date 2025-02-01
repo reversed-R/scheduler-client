@@ -9,6 +9,8 @@ export type DayPattern =
   | "CLASSES_OF_TSUKUBA_UNIV"
   | "HOURS";
 
+export type Availability = "OK" | "NOT_BAD" | "BAD";
+
 export type RoomAllInfo = {
   name: string;
   description: string;

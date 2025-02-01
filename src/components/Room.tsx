@@ -1,15 +1,35 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "./Room.css";
-import { RoomAllInfo } from "./types.ts";
-// import TimeCell from "./TimeCell.tsx";
-import AvailabilityCell from "./AvailabilityCell.tsx";
-import DateHeader from "./DateHeader.tsx";
-import HourHeader from "./HourHeader.tsx";
+import { RoomAllInfo, User } from "./types.ts";
 import { ADAY, AM_AND_PM, CLASSES_OF_TSUKUBA_UNIV, HOURS } from "./types.ts";
+import AvailabilityTable from "./AvailabilityTable.tsx";
+import TableHeader from "./TableHeader.tsx";
+import TableUserNameLine from "./TableUserNameLine.tsx";
+import { RegistrationMode } from "./contextType.ts";
+
+export const RegisterationModeContext = createContext<RegistrationMode>(
+  "BEFORE",
+);
+
+// export const context = createContext<Context>({
+//   roomId: 0,
+//   userRegisterFn: registerUser,
+// });
+
+export const userToRegister = createContext<User>({
+  name: "",
+  comment: "",
+  availabilities: [],
+});
+
+export const userRegisterFn = createContext(registerUser);
 
 function Room() {
   const { roomId } = useParams();
+  // const [c, setContext] = useContext(context);
+  // setContext({ roomId: roomId, UserRegisterFn: registerUser });
+  const [mode, setMode] = useState("BEFORE");
 
   const [roomData, setRoomData] = useState<RoomAllInfo>({
     name: "",
@@ -145,84 +165,73 @@ function Room() {
   }
 
   return (
-    <div style={{ alignItems: "center" }}>
+    <RegisterationModeContext.Provider value={[mode, setMode]}>
       <div style={{ alignItems: "center" }}>
-        <p>room id = {roomId}</p>
-        <div>
-          <p>{roomData.name}</p>
-          <p>{roomData.description}</p>
+        <div style={{ alignItems: "center" }}>
+          <p>room id = {roomId}</p>
+          <div>
+            <p>{roomData.name}</p>
+            <p>{roomData.description}</p>
+          </div>
+          <button
+            onClick={() => {
+              setMode((prev) => {
+                if (prev === "BEFORE") {
+                  return "DOING";
+                }
+                if (prev === "DOING") {
+                  return "BEFORE";
+                }
+                if (prev === "AFTER") {
+                  return "AFTER";
+                } else {
+                  return "DOING";
+                }
+              });
+            }}
+          >
+            register your plan
+          </button>
+        </div>
+        <div className="table">
+          <TableUserNameLine users={roomData.users} />
+          <div
+            className="table-main"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "auto 1fr",
+              gridAutoFlow: "column",
+            }}
+          >
+            <TableHeader dates={dates} />
+            <AvailabilityTable
+              availabilityTable={dates.map((date) =>
+                date.hours.map((hour) => hour.userAvailabilities)
+              )}
+            />
+          </div>
         </div>
       </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "auto auto 1fr",
-          gridAutoFlow: "column",
-        }}
-      >
-        <div style={{ width: "4em" }}>DATE</div>
-        <div style={{ width: "4em" }}>TIME</div>
-        <div
-          style={{
-            display: "table",
-            width: "100%",
-            tableLayout: "fixed",
-            borderCollapse: "separate",
-            borderSpacing: "2px 2px",
-          }}
-        >
-          {roomData.users.map((user, index) => (
-            <div key={index} style={{ display: "table-cell" }}>
-              {user.name}
-            </div>
-          ))}
-        </div>
-      </div>
-      <div>
-        {dates.map((date, index) => {
-          return (
-            <div
-              key={index}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "auto 1fr",
-                gridAutoFlow: "column",
-              }}
-            >
-              <DateHeader month={date.month} date={date.day} />
-              <div>
-                {date.hours.map((hour, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "auto 1fr",
-                      gridAutoFlow: "column",
-                    }}
-                  >
-                    <HourHeader key={index} hour={hour.hour} min={hour.min} />
-                    <div
-                      style={{
-                        display: "table",
-                        width: "100%",
-                        tableLayout: "fixed",
-                        borderCollapse: "separate",
-                        borderSpacing: "2px 2px",
-                      }}
-                    >
-                      {hour.userAvailabilities.map((a, index) => (
-                        <AvailabilityCell key={index} availability={a} />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+    </RegisterationModeContext.Provider>
   );
+}
+
+function registerUser(roomId: number, user: User) {
+  fetch("http://localhost:8080/api/v1/rooms/" + roomId + "/users", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(user),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Success:", data);
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+  return;
 }
 
 export default Room;
