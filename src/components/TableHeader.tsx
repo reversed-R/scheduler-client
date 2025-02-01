@@ -1,4 +1,4 @@
-import DateHeader from "./DateHeader";
+import DateHeader from "./DateHeader.tsx";
 import HourHeader from "./HourHeader.tsx";
 
 type Props = {
@@ -19,7 +19,12 @@ type HourHead = {
 
 function TableHeader(props: Props) {
   return (
-    <div className="table-header">
+    <div
+      className="table-header"
+      style={{
+        width: "8.5em",
+      }}
+    >
       {props.dates.map((date, index) => {
         return (
           <>

@@ -1,6 +1,5 @@
 import AvailabilityCell from "./AvailabilityCell.tsx";
 import { User } from "./types.ts";
-import UserRegisterHeader from "./UserRegisterHeader.tsx";
 
 type Props = {
   availabilityTable: string[][][];
@@ -8,7 +7,7 @@ type Props = {
 
 function AvailabilityTable(props: Props) {
   return (
-    <div>
+    <div className="availability-table" style={{ width: "100%" }}>
       {props.availabilityTable.map((dates) =>
         dates.map((hours, index) => (
           <div key={index}>
@@ -22,13 +21,6 @@ function AvailabilityTable(props: Props) {
                 borderSpacing: "2px 2px",
               }}
             >
-              <UserRegisterHeader
-                userRegisterFn={(roomId: number, user: User) => {
-                  console.log("roomId", roomId);
-                  console.log("user", user);
-                  console.log("register!");
-                }}
-              />
               {hours.map((a, index) => (
                 <AvailabilityCell key={index} availability={a} />
               ))}
